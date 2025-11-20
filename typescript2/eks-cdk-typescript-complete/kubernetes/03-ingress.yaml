@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prod-hello-ingress
+  namespace: prod-hello
+  annotations:
+    # AWS Load Balancer Controller annotations
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-name: prod-hello-alb
+    alb.ingress.kubernetes.io/group.name: prod-hello
+    
+    # Health check settings
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    
+    # Listener settings
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    
+    # Target group settings
+    alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=30,stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=3600
+    
+    # Subnet selection (private subnets for internal ALB)
+    alb.ingress.kubernetes.io/subnets: prod-eks-subnet-private-us-east-1a,prod-eks-subnet-private-us-east-1b,prod-eks-subnet-private-us-east-1c
+    
+    # Tags
+    alb.ingress.kubernetes.io/tags: Environment=production,Application=prod-hello,ManagedBy=kubernetes
+    
+    # SSL/TLS (optional - add if you want HTTPS)
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:575108957879:certificate/YOUR-CERT-ARN
+    # alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    
+spec:
+  ingressClassName: alb
+  rules:
+  - host: pagidh.sre.practice.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prod-hello-service
+            port:
+              number: 80

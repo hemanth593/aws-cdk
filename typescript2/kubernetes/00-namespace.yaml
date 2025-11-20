@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-hello
+  labels:
+    name: prod-hello
+    environment: production

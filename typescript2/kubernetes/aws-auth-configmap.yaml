@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::575108957879:role/devops-admins
+      username: devops-admin
+      groups:
+        - system:masters
+    - rolearn: arn:aws:iam::575108957879:role/prod-sre-workernode-role
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+  mapUsers: |
+    []
